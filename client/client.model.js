@@ -30,7 +30,12 @@ const clientSchema = new Schema({
     apiExp: {
         type: Date,
         required: false
-    }
+    },
+    lifecycles: [{
+        type: Schema.Types.ObjectId,
+        ref: 'ProjectLifecycle',
+        required: false
+    }]
 });
 
 module.exports = mongoose.model('Client', clientSchema);

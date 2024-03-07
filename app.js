@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('**', (req, res, next)=> {res.sendFile(path.join(__dirname, 'public', 'index.html'))});
 
 app.use((err, req, res, next) => {
-    const status = err.status || 500;
+    const status = err.statusCode || 500;
     res.status(status).json({message: err.message, error: err})
 })
 

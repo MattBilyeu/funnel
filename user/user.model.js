@@ -31,11 +31,11 @@ const userSchema = new Schema({
         type: Date,
         required: false
     },
-    lifecycles: [{
+    team: {
         type: Schema.Types.ObjectId,
-        ref: 'ProjectLifecycle',
+        ref: 'Team',
         required: false
-    }]
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);
