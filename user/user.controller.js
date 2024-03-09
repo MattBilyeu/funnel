@@ -12,7 +12,9 @@ exports.createUser = (req, res, next) => {
     User.findOne({email: email})
         .then(user => {
             if (user) {
-                return res.status(422).json({message: 'A user with that email already exists.'})
+                const error = new Error('A user with that email already exists.');
+                error.statusCode = 422;
+                return next(error);
             } else {
                 bcrypt.hash(password, 12)
                     .then(hashedPassword => {
@@ -28,16 +30,11 @@ exports.createUser = (req, res, next) => {
                             return res.status(201).json({message: 'User Created.', user: newUser})
                         })
                     })
-                    .catch(err => {
-                        console.log(err);
-                        res.status(500).json({message: 'Internal server error.'})
-                    })
             }
         })
         .catch(err => {
-            const error = new Error(err);
-            error.status(500);
-            next(error)
+            err.statusCode = 500;
+            return next(err);
         })
 }
 
@@ -55,33 +52,22 @@ exports.updateEmail = (req, res, next) => {
                 bcrypt.compare(password, user.password)
                     .then(doMatch => {
                         if (!doMatch) {
-                            return res.status(422).json({message: 'The email and password combination you have submitted has not been found.'})
+                            const error = new Error('The email and password combination you have submitted has not been found.');
+                            error.statusCode = 422;
+                            return next(error);
                         } else {
-                            if (foundUser.banned) {
-                                return res.status(422).json({message: 'The email you have used has been banned from the system.'})
-                            } else {
-                                foundUser.email = newEmail;
-                                foundUser.save()
-                                    .then(updatedUser => {
-                                        return res.status(200).json({message: 'Email updated.', user: updatedUser})
-                                    })
-                                    .catch(err => {
-                                        const error = new Error(err);
-                                        error.status(500);
-                                        next(error)
-                                    })
+                            foundUser.email = newEmail;
+                            foundUser.save()
+                                .then(updatedUser => {
+                                    return res.status(200).json({message: 'Email updated.', user: updatedUser})
+                                })
                             }
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.status(500).json({message: 'Internal server error.'})
-                    })
+                        })
             }
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).json({message: 'Internal server error.'})
+            err.statusCode = 500;
+            return next(err)
         })
 }
 
@@ -91,13 +77,15 @@ exports.sendPassUpdate = (req, res, next) => {
     User.findOne({email: email})
         .then(user => {
             if (!user || user.banned) {
-                return res.status(404).json({message: 'That email is not valid.'})
+                const error = new Error('That email is not valid.');
+                error.statusCode = 404;
+                return next(error);
             } else {
                 foundUser = user;
                 crypto.randomBytes(32, (err, buffer) => {
                     if (err) {
-                        console.log(err);
-                        next(new Error('Error creating reset token.'))
+                        err.statusCode = 500;
+                        return next(err);
                     };
                     const token = buffer.toString('hex');
                     foundUser.resetToken = token;
@@ -113,17 +101,12 @@ exports.sendPassUpdate = (req, res, next) => {
                         );
                         res.status(200).json({message: 'Password Reset Sent - Please check your email.'})
                         })
-                        .catch(err => {
-                            const error = new Error(err);
-                            error.status(500);
-                            next(error)
-                        })
                 })
             }
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).json({message: 'Internal server error.'})
+            err.statusCode = 500;
+            next(err);
         })
 }
 
@@ -135,7 +118,9 @@ exports.updatePassword = (req, res, next) => {
         .then(user => {
             const tokenExpiration = new Date(user.resetTokenExpiration);
             if (!user || tokenExpiration.getTime() < Date.now()) { //Checks if the token is not found or if it is expired, does not update password if it is.
-                return res.status(404).json({message: 'Your token is invalid.'})
+                const error = new Error('Your token is invalid.');
+                error.statusCode = 404;
+                return next(error);
             } else {
                 foundUser = user;
                 return bcrypt.hash(password, 12)
@@ -146,17 +131,12 @@ exports.updatePassword = (req, res, next) => {
                             updatedUser.password = 'redacted';
                             return res.status(200).json({message: 'Password updated.', user: updatedUser})
                         })
-                        .catch(err => {
-                            const error = new Error(err);
-                            error.status(500);
-                            next(error)
-                        })
                 })
             }
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).json({message: 'Internal server error.'})
+            err.statusCode = 500;
+            next(err)
         })
 }
 
@@ -165,13 +145,15 @@ exports.deleteUser = (req, res, next) => {
     User.findByIdAndDelete(userId)
         .then(deletedUser => {
             if (!deletedUser) {
-                return res.status(404).json({message: 'User not found.'})
+                const error = new Error('User not found.');
+                error.statusCode = 404;
+                return next(error);
             } else {
                 return res.status(200).json({message: 'User deleted.', user: null})
             }
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).json({message: 'Internal server error.'})
+            err.statusCode = 500;
+            next(err)
         })
 }
