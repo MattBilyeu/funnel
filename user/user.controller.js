@@ -24,9 +24,10 @@ exports.createUser = (req, res, next) => {
                             password: hashedPassword,
                             resetToken: null,
                             resetExpiration: null,
+                            teams: []
 
                         });
-                        newUser.save().then(newUser => {
+                        return newUser.save().then(newUser => {
                             return res.status(201).json({message: 'User Created.', user: newUser})
                         })
                     })
@@ -57,7 +58,7 @@ exports.updateEmail = (req, res, next) => {
                             return next(error);
                         } else {
                             foundUser.email = newEmail;
-                            foundUser.save()
+                            return foundUser.save()
                                 .then(updatedUser => {
                                     return res.status(200).json({message: 'Email updated.', user: updatedUser})
                                 })
@@ -90,7 +91,7 @@ exports.sendPassUpdate = (req, res, next) => {
                     const token = buffer.toString('hex');
                     foundUser.resetToken = token;
                     foundUser.tokenExpiration = Date.now() + (60 * 60 * 1000);
-                    foundUser.save()
+                    return foundUser.save()
                         .then(result => {
                             sendOne(email, 'Password Reset',
                             `
@@ -126,7 +127,7 @@ exports.updatePassword = (req, res, next) => {
                 return bcrypt.hash(password, 12)
                 .then(hashedPassword => {
                     foundUser.password = hashedPassword;
-                    foundUser.save()
+                    return foundUser.save()
                         .then(updatedUser => {
                             updatedUser.password = 'redacted';
                             return res.status(200).json({message: 'Password updated.', user: updatedUser})

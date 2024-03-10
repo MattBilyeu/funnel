@@ -27,7 +27,7 @@ exports.createClient = (req, res, next) => {
                             resetExpiration: null,
 
                         });
-                        newClient.save().then(newClient => {
+                        return newClient.save().then(newClient => {
                             return res.status(201).json({message: 'Client Created.', data: newClient})
                         })
                     })
@@ -64,7 +64,7 @@ exports.updateEmail = (req, res, next) => {
                             return res.status(422).json({message: 'The email and password combination you have submitted has not been found.'})
                         } else {
                             foundClient.email = newEmail;
-                            foundClient.save()
+                            return foundClient.save()
                                 .then(updatedClient => {
                                     return res.status(200).json({message: 'Email updated.', data: updatedClient})
                                 })
@@ -103,7 +103,7 @@ exports.sendPassUpdate = (req, res, next) => {
                     const token = buffer.toString('hex');
                     foundClient.resetToken = token;
                     foundClient.tokenExpiration = Date.now() + (60 * 60 * 1000);
-                    foundClient.save()
+                    return foundClient.save()
                         .then(result => {
                             sendOne(email, 'Password Reset',
                             `
@@ -142,7 +142,7 @@ exports.updatePassword = (req, res, next) => {
                 return bcrypt.hash(password, 12)
                 .then(hashedPassword => {
                     foundClient.password = hashedPassword;
-                    foundClient.save()
+                    return foundClient.save()
                         .then(updatedClient => {
                             updatedClient.password = 'redacted';
                             return res.status(200).json({message: 'Password updated.', data: updatedClient})

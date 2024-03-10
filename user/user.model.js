@@ -31,11 +31,11 @@ const userSchema = new Schema({
         type: Date,
         required: false
     },
-    team: {
+    teams: [{
         type: Schema.Types.ObjectId,
         ref: 'Team',
         required: false
-    }
+    }]
 });
 
 module.exports = mongoose.model('User', userSchema);

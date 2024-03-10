@@ -26,7 +26,7 @@ exports.login = (req, res, next) => {
                     user.apiKey = crypto.randomBytes(32).toString('hex');
                     const expiration = Date.now() + (1000 * 60 * 60 * 8);
                     user.apiExp = new Date(expiration);
-                    user.save()
+                    return user.save()
                         .then(updatedUser => {
                             res.status(200).json({message: 'Login successful.', data: updatedUser})
                         })
@@ -90,7 +90,7 @@ exports.logout = (req, res, next) => {
         .then(user => {
             user.apiKey = null;
             user.apiExp = null;
-            user.save()
+            return user.save()
                 .then(updatedUser => {
                     res.status(200).json({message: 'Logout successful.'})
                 })

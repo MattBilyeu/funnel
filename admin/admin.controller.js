@@ -20,7 +20,7 @@ exports.createAdmin = (req, res, next) => {
                         email: email,
                         password: hashedPassword
                     });
-                    newAdmin.save()
+                    return newAdmin.save()
                         .then(savedAdmin => {
                             res.status(201).json({message: 'Admin created.'})
                         })
@@ -48,20 +48,16 @@ exports.updateEmail = (req, res, next) => {
                         if (!doMatch) {
                             return res.status(422).json({message: 'The email and password combination you have submitted has not been found.'})
                         } else {
-                            if (foundAdmin.banned) {
-                                return res.status(422).json({message: 'The email you have used has been banned from the system.'})
-                            } else {
-                                foundAdmin.email = newEmail;
-                                foundAdmin.save()
-                                    .then(updatedAdmin => {
-                                        return res.status(200).json({message: 'Email updated.', data: updatedAdmin})
-                                    })
-                                    .catch(err => {
-                                        const error = new Error(err);
-                                        error.status(500);
-                                        next(error)
-                                    })
-                            }
+                            foundAdmin.email = newEmail;
+                            return foundAdmin.save()
+                                .then(updatedAdmin => {
+                                    return res.status(200).json({message: 'Email updated.', data: updatedAdmin})
+                                })
+                                .catch(err => {
+                                    const error = new Error(err);
+                                    error.status(500);
+                                    next(error)
+                                })
                         }
                     })
                     .catch(err => {
@@ -93,7 +89,7 @@ exports.sendPassUpdate = (req, res, next) => {
                     const token = buffer.toString('hex');
                     foundAdmin.resetToken = token;
                     foundAdmin.tokenExpiration = Date.now() + (60 * 60 * 1000);
-                    foundAdmin.save()
+                    return foundAdmin.save()
                         .then(result => {
                             sendOne(email, 'Password Reset',
                             `
@@ -132,7 +128,7 @@ exports.updatePassword = (req, res, next) => {
                 return bcrypt.hash(password, 12)
                 .then(hashedPassword => {
                     foundAdmin.password = hashedPassword;
-                    foundAdmin.save()
+                    return foundAdmin.save()
                         .then(updatedAdmin => {
                             updatedAdmin.password = 'redacted';
                             return res.status(200).json({message: 'Password updated.', data: updatedAdmin})
