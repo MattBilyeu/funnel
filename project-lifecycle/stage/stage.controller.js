@@ -47,7 +47,7 @@ exports.deleteStage = (req, res, next) => {
 
 exports.loadStagesToLifecycle = function (lifeCycleId, IdArray = []) {
     let lifecycle;
-    Lifecycle.findById(lifeCycleId)
+    return Lifecycle.findById(lifeCycleId)
         .then(foundLifecycle => {
             if (!foundLifecycle || foundLifecycle.prototype) {
                 throw new Error('Lifecycle not found or invalid.')
@@ -69,7 +69,7 @@ exports.loadStagesToLifecycle = function (lifeCycleId, IdArray = []) {
                     })
             }))
             .then(() => {
-                lifecycle.save();
+                return lifecycle.save()
             })
         })
         .catch(err => {

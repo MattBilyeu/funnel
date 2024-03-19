@@ -22,10 +22,6 @@ const projectLifecycleSchema = new Schema({
         type: Boolean,
         required: true
     },
-    isDefault: {
-        type: Boolean,
-        required: true
-    },
     notes: [{
         type: String,
         required: false
