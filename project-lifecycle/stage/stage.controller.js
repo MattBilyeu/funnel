@@ -88,6 +88,7 @@ exports.claimStage = (req, res, next) => {
                 return next(error)
             };
             stage.claimedBy = userId;
+            stage.status = 'in progress';
             stage.save()
                 .then(savedStage => {
                     res.status(200).json({message: 'Stage claimed.', data: savedStage})
