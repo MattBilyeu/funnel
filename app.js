@@ -10,11 +10,30 @@ const compression = require('compression');
 
 const app = express();
 
+const adminRoutes = require('./admin/admin.routes');
+const authRoutes = require('./auth/auth.routes');
+const clientRoutes = require('./client/client.routes');
+const projectRoutes = require('./project-lifecycle/project-lifecycle.routes');
+const stageRoutes = require('./project-lifecycle/stage/stage.routes');
+const teamRoutes = require('./team/team.routes');
+const userRoutes = require('./user/user.routes');
+const getRoutes = require('./getter/getter.routes');
+
 app.use(helmet());
 app.use(compression());
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.post('/admin', adminRoutes);
+app.post('/authRoutes', authRoutes);
+app.post('/client', clientRoutes);
+app.post('/project', projectRoutes);
+app.post('/stage', stageRoutes);
+app.post('/team', teamRoutes);
+app.post('/user', userRoutes);
+
+app.get('/get', getRoutes);
 
 app.get('**', (req, res, next)=> {res.sendFile(path.join(__dirname, 'public', 'index.html'))});
 

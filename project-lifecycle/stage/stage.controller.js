@@ -45,9 +45,15 @@ exports.deleteStage = (req, res, next) => {
         })
 }
 
-exports.loadStagesToLifecycle = function (lifeCycleId, IdArray = []) {
+exports.deleteLifecycleStages = async function(idArray) {
+    return Promise.all(idArray.map(Id => {
+        return Stage.findByIdAndDelete(Id)
+    }))
+}
+
+exports.loadStagesToLifecycle = function (lifecycleId, IdArray = []) {
     let lifecycle;
-    return Lifecycle.findById(lifeCycleId)
+    return Lifecycle.findById(lifecycleId)
         .then(foundLifecycle => {
             if (!foundLifecycle || foundLifecycle.prototype) {
                 throw new Error('Lifecycle not found or invalid.')
@@ -92,6 +98,22 @@ exports.claimStage = (req, res, next) => {
             stage.save()
                 .then(savedStage => {
                     res.status(200).json({message: 'Stage claimed.', data: savedStage})
+                })
+        })
+        .catch(err => {
+            err.statusCode = 500;
+            next(err)
+        })
+}
+
+exports.completeStage = (req, res, next) => {
+    const stageId = req.body.stageId;
+    Stage.findById(stageId)
+        .then(stage => {
+            stage.status = 'Complete';
+            stage.save()
+                .then(savedStage => {
+                    res.status(200).json({message: 'Status updated.', data: savedStage})
                 })
         })
         .catch(err => {

@@ -11,4 +11,6 @@ router.post('/deleteStage', authController.authenticateAdmin, stageController.de
 
 router.post('/claimStage', authController.authenticateUser, stageController.claimStage);
 
+router.post('/completeStage', authController.authenticateUser, stageController.completeStage);
+
 module.exports = router

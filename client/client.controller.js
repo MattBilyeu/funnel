@@ -184,3 +184,12 @@ exports.deleteClient = (req, res, next) => {
             next(error)
         })
 }
+
+exports.addProject = function(clientId, projectId) {
+    return Client.findById(clientId)
+        .then(client => {
+            client.lifecycles.push(projectId);
+            return client.save()
+        })
+        .catch(err => console.log(err))
+}
