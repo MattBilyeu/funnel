@@ -10,6 +10,7 @@ exports.createClient = (req, res, next) => {
     const name = req.body.name;
     const email = req.body.email.toLowerCase(); //Done to ensure emails are case insensitive.  Login attempts also do this to whatever email is entered.
     const password = req.body.password;
+    const phone = req.body.phone;
     Client.findOne({email: email})
         .then(client => {
             if (client) {
@@ -25,7 +26,7 @@ exports.createClient = (req, res, next) => {
                             password: hashedPassword,
                             resetToken: null,
                             resetExpiration: null,
-
+                            phone: phone
                         });
                         return newClient.save().then(newClient => {
                             return res.status(201).json({message: 'Client Created.', data: newClient})
